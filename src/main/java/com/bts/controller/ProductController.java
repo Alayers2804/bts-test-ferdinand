@@ -1,9 +1,10 @@
-
 package com.bts.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.bts.dto.ProductRequest;
+import com.bts.dto.ProductResponse;
 import com.bts.entity.Product;
 import com.bts.service.ProductService;
 
@@ -41,29 +42,48 @@ public class ProductController {
         description = "Returns a paginated product list with optional title search and category filtering."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Products retrieved successfully"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Products retrieved successfully"
+        ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid pagination or filter parameters",
             content = @Content
         )
     })
-    public ResponseEntity<List<Product>> getAllProducts(
-            @Parameter(description = "Search products by title", example = "T-Shirt")
+    public ResponseEntity<List<ProductResponse>> getAllProducts(
+            @Parameter(
+                description = "Search products by title",
+                example = "T-Shirt"
+            )
             @RequestParam(required = false) String search,
 
-            @Parameter(description = "Filter by product category", example = "Clothes")
+            @Parameter(
+                description = "Filter by product category",
+                example = "Clothes"
+            )
             @RequestParam(required = false) String category,
 
-            @Parameter(description = "Number of products per page", example = "10")
+            @Parameter(
+                description = "Number of products per page",
+                example = "10"
+            )
             @RequestParam(defaultValue = "10") int limit,
 
-            @Parameter(description = "Page number, starting at 1", example = "1")
+            @Parameter(
+                description = "Page number, starting at 1",
+                example = "1"
+            )
             @RequestParam(defaultValue = "1") int page) {
 
-        return ResponseEntity.ok(
-            productService.getAllProducts(search, category, limit, page)
-        );
+        List<ProductResponse> products = productService
+                .getAllProducts(search, category, limit, page)
+                .stream()
+                .map(ProductResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")
@@ -76,7 +96,7 @@ public class ProductController {
             responseCode = "200",
             description = "Product found",
             content = @Content(
-                schema = @Schema(implementation = Product.class)
+                schema = @Schema(implementation = ProductResponse.class)
             )
         ),
         @ApiResponse(
@@ -85,11 +105,17 @@ public class ProductController {
             content = @Content
         )
     })
-    public ResponseEntity<Product> getProductById(
-            @Parameter(description = "Product ID", example = "1", required = true)
+    public ResponseEntity<ProductResponse> getProductById(
+            @Parameter(
+                description = "Product ID",
+                example = "1",
+                required = true
+            )
             @PathVariable Long id) {
 
-        return ResponseEntity.ok(productService.getProductById(id));
+        Product product = productService.getProductById(id);
+
+        return ResponseEntity.ok(new ProductResponse(product));
     }
 
     @PostMapping
@@ -98,7 +124,13 @@ public class ProductController {
         description = "Creates a product using the supplied product details. Requires authorization."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Product created successfully"),
+        @ApiResponse(
+            responseCode = "201",
+            description = "Product created successfully",
+            content = @Content(
+                schema = @Schema(implementation = ProductResponse.class)
+            )
+        ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid product data",
@@ -115,7 +147,7 @@ public class ProductController {
             content = @Content
         )
     })
-    public ResponseEntity<Product> createProduct(
+    public ResponseEntity<ProductResponse> createProduct(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Product details to create",
                 required = true
@@ -124,7 +156,9 @@ public class ProductController {
 
         Product product = productService.createProduct(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ProductResponse(product));
     }
 
     @PutMapping("/{id}")
@@ -133,7 +167,13 @@ public class ProductController {
         description = "Updates an existing product. Requires authorization."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Product updated successfully",
+            content = @Content(
+                schema = @Schema(implementation = ProductResponse.class)
+            )
+        ),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid product data",
@@ -155,8 +195,12 @@ public class ProductController {
             content = @Content
         )
     })
-    public ResponseEntity<Product> updateProduct(
-            @Parameter(description = "ID of the product to update", example = "1", required = true)
+    public ResponseEntity<ProductResponse> updateProduct(
+            @Parameter(
+                description = "ID of the product to update",
+                example = "1",
+                required = true
+            )
             @PathVariable Long id,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -165,7 +209,9 @@ public class ProductController {
             )
             @Valid @RequestBody ProductRequest request) {
 
-        return ResponseEntity.ok(productService.updateProduct(id, request));
+        Product product = productService.updateProduct(id, request);
+
+        return ResponseEntity.ok(new ProductResponse(product));
     }
 
     @DeleteMapping("/{id}")
@@ -174,7 +220,10 @@ public class ProductController {
         description = "Deletes an existing product. Requires authorization."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+        @ApiResponse(
+            responseCode = "204",
+            description = "Product deleted successfully"
+        ),
         @ApiResponse(
             responseCode = "401",
             description = "Authentication required",
@@ -192,7 +241,11 @@ public class ProductController {
         )
     })
     public ResponseEntity<Void> deleteProduct(
-            @Parameter(description = "ID of the product to delete", example = "1", required = true)
+            @Parameter(
+                description = "ID of the product to delete",
+                example = "1",
+                required = true
+            )
             @PathVariable Long id) {
 
         productService.deleteProduct(id);

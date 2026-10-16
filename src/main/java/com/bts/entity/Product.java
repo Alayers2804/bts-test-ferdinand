@@ -34,6 +34,8 @@ public class Product {
     private LocalDateTime  createdAt;
 
     private String createdBy;
+    
+    private long created_by_id;
 
     private LocalDateTime  updatedAt;
 
@@ -81,11 +83,11 @@ public class Product {
         this.category = category;
     }
 
-    public String getImage() {
+    public String getImages() {
         return images;
     }
 
-    public void setImage(String images) {
+    public void setImages(String images) {
         this.images = images;
     }
 
@@ -103,6 +105,15 @@ public class Product {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    
+    public long getCreated_by_id() {
+        return created_by_id;
+    }
+
+    public void setCreated_by_id(long created_by_id) {
+        this.created_by_id = created_by_id;
     }
 
     public LocalDateTime getUpdatedAt() {

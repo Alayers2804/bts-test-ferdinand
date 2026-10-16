@@ -25,7 +25,7 @@ public class ProductRequest {
     private CategoryEnum category;
 
     @NotBlank(message = "Image is required")
-    private String image;
+    private String images;
 
     public ProductRequest() {
     }
@@ -62,11 +62,11 @@ public class ProductRequest {
         this.category = category;
     }
 
-    public String getImage() {
-        return image;
+    public String getImages() {
+        return images;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImages(String images) {
+        this.images = images;
     }
 }

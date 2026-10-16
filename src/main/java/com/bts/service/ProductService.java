@@ -123,7 +123,7 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setDescription(request.getDescription());
         product.setCategory(request.getCategory());
-        product.setImage(request.getImage());
+        product.setImages(request.getImages());
 
         return productRepository.save(product);
     }
@@ -136,7 +136,7 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setDescription(request.getDescription());
         product.setCategory(request.getCategory());
-        product.setImage(request.getImage());
+        product.setImages(request.getImages());
 
         return productRepository.save(product);
     }

@@ -27,6 +27,13 @@ public class AuthService {
     }
 
     public void register(RegisterRequest request) {
+        if (request.getPassword() == null
+                || !request.getPassword().equals(
+                        request.getPassword_confirmation())) {
+            throw new IllegalArgumentException(
+                    "Password confirmation does not match");
+        }
+
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -47,24 +54,18 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-            .orElseThrow(() ->
-                new IllegalArgumentException(
-                    "Invalid username or password"
-                )
-            );
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Invalid username or password"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException(
-                "Invalid username or password"
-            );
+                    "Invalid username or password");
         }
 
-        String accessToken =
-            tokenService.generateAccessToken(user.getUsername());
+        String accessToken = tokenService.generateAccessToken(user.getUsername());
 
-        String refreshToken =
-            tokenService.generateRefreshToken(user.getUsername());
+        String refreshToken = tokenService.generateRefreshToken(user.getUsername());
 
         return new LoginResponse(accessToken, refreshToken);
     }

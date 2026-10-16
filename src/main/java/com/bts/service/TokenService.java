@@ -25,6 +25,26 @@ public class TokenService {
         this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
+
+    public String getUsernameFromAccessToken(String token) {
+        var claims = Jwts.parser()
+            .verifyWith(signingKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+
+        String tokenType = claims.get("token_type", String.class);
+
+        if (!"access".equals(tokenType)) {
+            throw new IllegalArgumentException(
+                "An access token is required"
+            );
+        }
+
+        return claims.getSubject();
+    }
+
+
     public String generateAccessToken(String username) {
         return generateToken(
             username,
