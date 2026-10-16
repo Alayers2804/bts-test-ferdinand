@@ -1,0 +1,39 @@
+
+services:
+  db:
+    image: mariadb:lts-ubi10
+    container_name: bts-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: product-db
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set root password in .env}
+      MARIADB_USER: bts_app
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    container_name: bts-api
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:mariadb://db:3306/product-db
+      DB_USERNAME: bts_app
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mariadb_data:
